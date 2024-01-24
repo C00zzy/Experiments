@@ -1,4 +1,3 @@
-#! /bin/bash
 if [ "$EUID" -ne 0 ]; then
   echo "Not ran as sudo | Please run this script as sudo"
   exit 1
@@ -14,3 +13,23 @@ echo -e "n\n1\n\n+512M\nt\n1\n1\nw" | fdisk "$target_disk"
 
 # Create the secondary partition
 echo -e "n\n2\n\n\nw" | fdisk "$target_disk"
+
+echo "Formating partitions with file systems"
+
+read -p "Enter the boot EFI partiton: " efi_partiton
+read -p "Enter the root partiton: " root_partiton
+
+mkfs.vfat -F 32 "$efi_partiton"
+
+read -p "Enter the File system for root" filesystem
+mkfs."$filesystem" "$root_partiton"
+
+mount "$root_partiton" /mnt
+
+mkdir /mnt/boot/efi
+
+mount "$efi_partiton" /mnt/boot/efi
+
+pacstrap -K /mnt base linux linux-firmware vim networkmanager base-devel
+
+genfstab -U /mnt >> /mnt/etc/fstab
