@@ -1,3 +1,4 @@
+#! /bin/bash
 if [ "$EUID" -ne 0 ]; then
   echo "Not ran as sudo | Please run this script as sudo"
   exit 1
@@ -26,10 +27,26 @@ mkfs."$filesystem" "$root_partiton"
 
 mount "$root_partiton" /mnt
 
-mkdir /mnt/boot/efi
+mkdir --parents /mnt/boot/efi
 
 mount "$efi_partiton" /mnt/boot/efi
 
-pacstrap -K /mnt base linux linux-firmware vim networkmanager base-devel
+pacstrap -K /mnt base linux linux-firmware vim networkmanager base-devel grub efibootmgr os-prober
 
 genfstab -U /mnt >> /mnt/etc/fstab
+
+ln -sf /mnt/usr/share/zoneinfo/America/New_york /mnt/etc/localtime
+
+echo "en_US.UTF-8" > /mnt/etc/locale.gen
+
+locale-gen
+
+echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
+
+grub-install "$efi_partiton"
+
+grub-mkconfig -o /mnt/boot/grub/grub.cfg
+
+#umount -a
+
+#reboot
