@@ -6,11 +6,11 @@ fi
 
 read -p "Enter the target disk: " target_disk
 
-# Create GPT partition table
-echo -e "g\nw" | gdisk "$target_disk"
+# Create a new GPT partition table
+parted -s "$target_disk" mklabel gpt
 
 # Create the EFI partition
-echo -e "n\n1\n\n+512M\nef00\nw" | gdisk "$target_disk"
+echo -e "n\n1\n\n+512M\nt\n1\n1\nw" | fdisk "$target_disk"
 
-# Create the second partition
-echo -e "n\n2\n\n\nw" | gdisk "$target_disk"
+# Create the secondary partition
+echo -e "n\n2\n\n\nw" | fdisk "$target_disk"
