@@ -4,6 +4,13 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-read -p "Enter the target disk:" target_disk
-echo -e "n\np\n1\n\n+1G\nt\n1\nw" | fdisk "$target_disk"
-echo -e "n\n2\n\n\nw" | fdisk "$target_disk"
+read -p "Enter the target disk: " target_disk
+
+# Create GPT partition table
+echo -e "g\nw" | gdisk "$target_disk"
+
+# Create the EFI partition
+echo -e "n\n1\n\n+512M\nef00\nw" | gdisk "$target_disk"
+
+# Create the second partition
+echo -e "n\n2\n\n\nw" | gdisk "$target_disk"
