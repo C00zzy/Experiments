@@ -43,9 +43,13 @@ locale-gen
 
 echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
 
-grub-install "$efi_partiton"
+read -p "Enter the grub boot target (e.g., /dev/sdX): " target_disk
 
-grub-mkconfig -o /mnt/boot/grub/grub.cfg
+# Install GRUB to the specified disk
+grub-install --target=x86_64-efi --efi-directory=/mnt/boot/efi --bootloader-id=GRUB --recheck "$target_disk"
+
+# Generate GRUB configuration file
+grub-mkconfig -o /boot/grub/grub.cfg
 
 #umount -a
 
